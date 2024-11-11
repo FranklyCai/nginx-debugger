@@ -1,4 +1,7 @@
 <div align="center">
+  <div style="margin-bottom: 20px">
+  中文文档 <span style="margin: 0 14px">|</span> <a href="README.en.md">English Documentation</a>
+  </div>
   <img src="assets/nginx-debugger.png" alt="NGINX Debugger">
 </div>
 <br>
@@ -24,9 +27,9 @@
 
 作为一名前端工程师，与 NGINX 打交道是我每天的工作日常。NGINX 功能强大，配置灵活，但是对于新手来说很难掌握，尤其是涉及与 location 相关的配置：
 
-- 首先，location 支持多种匹配方式，如 <b>前缀匹配</b>、<b>精确匹配</b>、<b>正则匹配</b> 等，不同的匹配方式还具有<b>不同优先级</b>，很容易搞混导致配置错误。
+- 首先，`location` 支持多种匹配方式，如 <b>前缀匹配</b>、<b>精确匹配</b>、<b>正则匹配</b> 等，不同的匹配方式还具有<b>不同优先级</b>，很容易搞混导致配置错误。
 
-- 其次，location 里可以搭配其它指令，如 <i>rewrite</i>、<i>try_files</i>、<i>proxy_pass</i> 等，这些能让 NGINX 产生不同的行为：比如 <i>rewrite</i> 会修改 URL 地址，导致请求在 NGINX 内部进行跳转，匹配到其它的规则；<i>try_files</i> 有类似的效果；而 <i>proxy_pass</i> 则会修改请求的 <i>upstream</i>，将其转发至下一终端。
+- 其次，`location` 里可以搭配其它指令，如 <i>rewrite</i>、<i>try_files</i>、<i>proxy_pass</i> 等，这些能让 NGINX 产生不同的行为：比如 <i>rewrite</i> 会修改 URL 地址，导致请求在 NGINX 内部进行跳转，匹配到其它的规则；<i>try_files</i> 有类似的效果；而 <i>proxy_pass</i> 则会修改请求的 <i>upstream</i>，将其转发至下一终端。
 
 我曾经查阅多方资料，希望能找到一个好的解决方案，但结果一无所获 😞。于是，我决定自己开发一个工具，来帮我省时高效地解决以上所有问题 —— <b>NGINX Debugger</b> 应运而生 🥳
 
@@ -44,7 +47,7 @@ Windows 的文件系统结构相较于 Linux 来说更为简单。你只需将�
 
 ### Linux
 
-Linux 版的 NGINX 在编译时，需要指定各选项目录（如--modules-path、--sbin-path、--conf-path 等），我以时下最流行的 Linux 发行版 —— Ubuntu 为参照，基于它的 Nginx 安装目录，使用以下指令对 Nginx Debugger 进行了编译：
+Linux 版的 NGINX 在编译时，需要指定各选项目录（如 --modules-path、--sbin-path、--conf-path 等），我以时下最流行的 Linux 发行版 —— Ubuntu 为参照，基于它的 Nginx 安装目录，使用以下指令对 Nginx Debugger 进行了编译：
 
 <img src="assets/cmd.png" alt="编译指令" height="350" width="100%">
 
