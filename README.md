@@ -1,7 +1,8 @@
 <div align="center">
-  <div style="margin-bottom: 20px">
+  <div>
   中文文档 <span style="margin: 0 14px">|</span> <a href="README.en.md">English Documentation</a>
   </div>
+  <br>
   <img src="assets/nginx-debugger.png" alt="NGINX Debugger">
 </div>
 <br>
