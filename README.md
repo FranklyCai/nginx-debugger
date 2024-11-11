@@ -1,9 +1,8 @@
-<picture>
-  <source srcset="./assets/logo.png">
-  <img alt="NGINX Banner">
-</picture>
-
-> NGINX 是世界上最流行的 Web 服务器，高性能负载均衡器，反向代理，API 网关和内容缓存。
+<div align="center">
+  <img src="assets/nginx-debugger.png" alt="NGINX Debugger">
+</div>
+<br>
+> <b>NGINX Debugger 致力于打造最高效、最便捷、最全能的 NGINX 调试器</b>
 
 ## 目录
 
