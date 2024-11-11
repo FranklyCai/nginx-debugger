@@ -1,70 +1,3 @@
-<style>
-body {
-  font-size: 15px;
-}
-/* .tag {
-  box-sizing: border-box;
-  font-size: 14px;
-  list-style: none;
-  display: inline-block;
-  margin: 2px 4px;
-  padding-inline: 7px;
-  white-space: nowrap;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  transition: all 0.2s;
-  text-align: start;
-  border-color: transparent;
-  color: #fff;
-  background-color: rgb(135, 208, 104);
-}
-.location-tag {
-  background-color: rgb(1, 150, 58);
-  background-color: rgb(135, 208, 104);
-}
-.directive-tag {
-  background-color: rgb(135, 208, 104);
-  background-color: rgb(45, 183, 245);
-}
-.option-tag {
-  background-color: #2db7f5;
-} */
-directive-tag {
-  box-sizing: border-box;
-  font-size: 14px;
-  list-style: none;
-  display: inline-block;
-  margin: 2px 4px;
-  padding-inline: 7px;
-  white-space: nowrap;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  transition: all 0.2s;
-  text-align: start;
-  border-color: transparent;
-  color: #fff;
-  background-color: rgb(135, 208, 104);
-}
-option-tag {
-  box-sizing: border-box;
-  font-size: 14px;
-  list-style: none;
-  display: inline-block;
-  margin: 2px 4px;
-  padding-inline: 7px;
-  white-space: nowrap;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  transition: all 0.2s;
-  text-align: start;
-  border-color: transparent;
-  color: #fff;
-  background-color: #2db7f5;
-}
-pre code {
-  font-size: 14px;
-}
-</style>
 <picture>
   <source srcset="./assets/logo.png">
   <img alt="NGINX Banner">
@@ -90,17 +23,17 @@ pre code {
 
 ## NGINX Debugger 的由来
 
-作为一名前端工程师，与 NGINX 打交道是我每天的工作日常。NGINX 功能强大，配置灵活，但是对于新手来说很难掌握，尤其是涉及与<directive-tag>location</directive-tag>相关的配置：
+作为一名前端工程师，与 NGINX 打交道是我每天的工作日常。NGINX 功能强大，配置灵活，但是对于新手来说很难掌握，尤其是涉及与 location 相关的配置：
 
-- 首先，<directive-tag>location</directive-tag>支持多种匹配方式，如 <b>前缀匹配</b>、<b>精确匹配</b>、<b>正则匹配</b> 等，不同的匹配方式还具有<b>不同优先级</b>，很容易搞混导致配置错误。
+- 首先，location 支持多种匹配方式，如 <b>前缀匹配</b>、<b>精确匹配</b>、<b>正则匹配</b> 等，不同的匹配方式还具有<b>不同优先级</b>，很容易搞混导致配置错误。
 
-- 其次，<directive-tag>location</directive-tag>里可以搭配其它指令，如<directive-tag>rewrite</directive-tag>、<directive-tag>try_files</directive-tag>、<directive-tag>proxy_pass</directive-tag>等，这些能让 NGINX 产生不同的行为：比如 <span class="tag directive-tag">rewrite</span>会修改 URL 地址，导致请求在 NGINX 内部进行跳转，匹配到其它的规则；<directive-tag>try_files</directive-tag>有类似的效果；而 <directive-tag>proxy_pass</directive-tag> 则会修改请求的 `upstream`，将其转发至下一终端。
+- 其次，location 里可以搭配其它指令，如 <i>rewrite</i>、<i>try_files</i>、<i>proxy_pass</i> 等，这些能让 NGINX 产生不同的行为：比如 <i>rewrite</i> 会修改 URL 地址，导致请求在 NGINX 内部进行跳转，匹配到其它的规则；<i>try_files</i> 有类似的效果；而 <i>proxy_pass</i> 则会修改请求的 <i>upstream</i>，将其转发至下一终端。
 
-<span style="line-height: 2rem">我曾经查阅多方资料，希望能找到一个好的解决方案，但结果一无所获<span style="font-size: 2rem">😞</span>。于是，我决定自己开发一个工具，来帮我省时高效地解决以上所有问题，<b>NGINX Debugger</b> 便应运而生了<span style="font-size: 2rem">🥳</span></span>
+我曾经查阅多方资料，希望能找到一个好的解决方案，但结果一无所获 😞。于是，我决定自己开发一个工具，来帮我省时高效地解决以上所有问题 —— <b>NGINX Debugger</b> 应运而生 🥳
 
 ## 技术细节
 
-NGINX Debugger 是基于 NGINX 最新的 🏷️[1.27.2](https://github.com/nginx/nginx/commit/e24f7ccc161f1a2a759eb27263ec9af4fc7c8e96) 版本进行再创作的：它给 `ngx_http_request_s` 结构体新增了一个数组属性 `ngx_array_t *matched_locations`，用于存储 NGINX 匹配 `location` 的过程；又在 `ngx_http_upstream.c` 中注册了两个变量 —— <span class="tag option-tag">upstream_uri</span> 和 <span class="tag option-tag">matched_locations</span>，让我们可以在 `access.log` 里通过 `$upstream_uri`和`$matched_locations` 获取到 NGINX 转发的 <i>完整上游地址</i> 以及 location 的 <i>完整匹配过程</i>。<b>除此之外，代码没有做任何改动，整体框架保持不变。因此，你不用担心 NGINX 的工作模式发生了任何变化，也不用担心变量值的真实性与准确性，因为它们只是对 NGINX 内部变量的一点简单拼接、映射而已！</b>
+NGINX Debugger 是基于 NGINX 最新的 🏷️[1.27.2](https://github.com/nginx/nginx/commit/e24f7ccc161f1a2a759eb27263ec9af4fc7c8e96) 版本进行再创作的：它给 `ngx_http_request_s` 结构体新增了一个数组属性 `ngx_array_t *matched_locations`，用于存储 NGINX 匹配 `location` 的过程；又在 `ngx_http_upstream.c` 中注册了两个变量 —— upstream_uri 和 matched_locations，让我们可以在 <i>access.log</i> 里通过 `$upstream_uri` 和 `$matched_locations` 获取 NGINX 转发的 <i>完整上游地址</i> 以及 location 的 <i>完整匹配过程</i>。<b>除此之外，代码没有做任何改动，整体框架保持不变。</b>因此，你不用担心 NGINX 的工作模式发生了任何变化，也不用担心变量值的真实性与准确性，因为它们只是对 NGINX 内部变量的一点简单拼接、映射而已。
 
 ## 如何使用
 
@@ -108,11 +41,11 @@ NGINX Debugger 是基于 NGINX 最新的 🏷️[1.27.2](https://github.com/ngin
 
 ### Windows
 
-Windows 的文件系统结构相较于 Linux 来说更为简单。你只需将仓库里的 nginx.exe 文件复制到你本地的 nginx 文件夹下，替换掉之前的可执行文件即可。其它操作与之前的一模一样，不需要做任何改变。
+Windows 的文件系统结构相较于 Linux 来说更为简单。你只需将仓库里的 <i>nginx.exe</i> 文件复制到你本地的 NGINX 文件夹下，替换掉之前的可执行文件即可。
 
 ### Linux
 
-Linux 版的 NGINX 在编译时，需要指定各选项目录（如<option-tag>--modules-path</option-tag>、<option-tag>--sbin-path</option-tag>、<option-tag>--conf-path</option-tag>等），我以时下最流行的 Linux 发行版 —— <option-tag>Ubuntu</option-tag>为参照，基于它的 Nginx 安装目录，使用以下指令对 Nginx Debugger 进行了编译：
+Linux 版的 NGINX 在编译时，需要指定各选项目录（如--modules-path、--sbin-path、--conf-path 等），我以时下最流行的 Linux 发行版 —— Ubuntu 为参照，基于它的 Nginx 安装目录，使用以下指令对 Nginx Debugger 进行了编译：
 
 <img src="assets/cmd.png" alt="编译指令" height="350" width="100%">
 
@@ -132,7 +65,7 @@ Linux 版的 NGINX 在编译时，需要指定各选项目录（如<option-tag>-
 
 ## 参考配置
 
-可以参照以下配置在 access.log 里启用对<option-tag>upstream_uri</option-tag>和<option-tag>matched_locations</option-tag>的支持<small>（仅供参考，实际可按需配置）</small>
+可以参照以下配置在 access.log 里启用对 upstream_uri 和 matched_locations 的支持（仅供参考，实际可按需配置）
 
 ![配置](assets/configuration.png)
 
