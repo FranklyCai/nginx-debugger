@@ -80,7 +80,7 @@ Linux 版的 NGINX 在编译时，需要指定各选项目录（如 --modules-pa
 
 ## 参考配置
 
-可以参照以下配置在 access.log 里启用对 upstream_uri 和 matched_locations 的支持（仅供参考，实际可按需配置）
+可以参照以下配置在 nginx.conf 里启用对 upstream_uri 和 matched_locations 的支持（仅供参考，实际可按需配置）
 
 ![配置](assets/configuration.png)
 

@@ -81,7 +81,7 @@ Although there are many Linux distributions, their Nginx installation directory 
 
 ## Reference Configuration
 
-You can refer to the following configuration to enable support for upstream_uri and matched_locations in access.log (for reference only; you can configure as needed):
+You can refer to the following configuration to enable support for upstream_uri and matched_locations in nginx.conf (for reference only; you can configure as needed):
 
 ![配置](assets/configuration.png)
 
