@@ -1,12 +1,16 @@
 <div align="center">
   <div>
-  中文文档 <span style="margin: 0 14px">|</span> <a href="README.en.md">English Documentation</a>
+  中文文档&emsp;|&emsp;<a href="README.en.md">English Documentation</a>
   </div>
   <br>
-  <img src="assets/nginx-debugger.png" alt="NGINX Debugger">
+  <br>
+  <img src="assets/nginx-debugger.png" alt="NGINX 调试器">
+<br>
+
+# 致力于打造最高效、最便捷、最全能的 NGINX 调试器
+
 </div>
 <br>
-> <b>NGINX Debugger 致力于打造最高效、最便捷、最全能的 NGINX 调试器</b>
 
 ## 目录
 
