@@ -15,12 +15,13 @@
 ## Table of Contents
 
 - [The Origin of NGINX Debugger](#the-origin-of-nginx-debugger)
-- [Technical Details](#technical-details)
+- [Problems Solved by NGINX Debugger](#problems-solved-by-nginx-debugger)
 - [How to Use](#how-to-use)
   - [Windows](#windows)
   - [Linux](#linux)
   - [FAQ](#faq)
 - [Reference Configuration](#reference-configuration)
+- [Technical Details](#technical-details)
 - [Comparison with Other Tools](#comparison-with-other-tools)
   - [Fiddler](#fiddler)
   - [Wireshark](#wireshark)
@@ -30,17 +31,25 @@
 
 ## The Origin of NGINX Debugger
 
-As a front-end engineer, dealing with NGINX is part of my daily routine. NGINX is powerful and offers flexible configurations, but it's challenging for beginners to master, especially when it involves configurations related to location:
+As a front-end engineer, dealing with NGINX is part of my daily routine. But the more I work with NGINX, the more I feel that writing NGINX configuration files is a <b>time-consuming</b> and <b>extremely error-prone</b> task (︶︹︶). Although NGINX is powerful, its configuration directives are <b>numerous</b> and <b>complex</b>, and even a small change can bring about drastic differences. Therefore, we must be extremely cautious when writing NGINX configuration files! Among the many NGINX configuration options, the configuration of the `location` block is a nightmare within a nightmare for me 😭:
 
 - Firstly, `location` supports multiple matching methods, such as <b>prefix matching</b>, <b>exact matching</b> and <b>regex matching</b>. Different matching methods have <b>different priorities</b>, which can easily cause confusion and lead to configuration errors.
 
-- Secondly, `location` can be paired with other directives like <i>rewrite</i>, <i>try_files</i>, <i>proxy_pass</i>, etc. These can make NGINX exhibit different behaviors: for example, <i>rewrite</i> can modify the URL, causing the request to internally redirect within NGINX and match other rules; <i>try_files</i> has a similar effect; while <i>proxy_pass</i> can modify the request's <i>upstream</i>, forwarding it to the next endpoint.
+- Secondly, within the `location`, you can use other directives like <b>rewrite</b>, <b>try_files</b>, <b>proxy_pass</b>, etc. These can make NGINX exhibit different behaviors: for example, <i>rewrite</i> can modify the URL, causing the request to internally redirect within NGINX and match other rules; <i>try_files</i> has a similar effect; while <i>proxy_pass</i> can modify the request's upstream, forwarding it to another endpoint.
 
-I have consulted various resources hoping to find a good solution, but to no avail 😞. So, I decided to develop a tool myself to help me efficiently solve all the above problems — <b>NGINX Debugger</b> was born 🥳
+Under such circumstances, when debugging NGINX configurations, we may encounter some <b>"inexplicable bugs"</b> — for example, we clearly expect a request to hit `locationA`, but it behaves as if it hit `locationB`; or we hope that after a request is forwarded, the complete path is `hostname:port/aaa/bbb/ccc`, but in fact, it is forwarded as `hostname:port/bbb/ccc`.
 
-## Technical Details
+These annoying "bugs" are actually because the request may be internally redirected within NGINX. When the request initially hits `locationA`, due to the presence of the `rewrite` directive in `locationA`, the rewritten request happens to match `locationB`. Additionally, NGINX uses Perl's regular expression engine for matching `location`, which many people are not familiar with. Furthermore, when the `proxy_pass` directive forwards the request to the upstream, the way it concatenates the upstream URI varies in many cases, and the paths concatenated under different circumstances are completely different. Therefore, debugging these issues is quite troublesome and may sometimes take up most of the day 😞.
 
-NGINX Debugger is a recreation based on NGINX's latest version 🏷️[1.27.2](https://github.com/nginx/nginx/commit/e24f7ccc161f1a2a759eb27263ec9af4fc7c8e96): it adds an array property `ngx_array_t *matched_locations` to the `ngx_http_request_s` structure to store the process of NGINX matching location; it also registers two variables in `ngx_http_upstream.c` — upstream_uri and matched_locations, allowing us to obtain NGINX's <i>complete upstream address</i> and the <i>complete matching process of location</i> in <i>access.log</i> via `$upstream_uri` and `$matched_locations`. <b>Besides that, the code hasn't been changed at all, and the overall framework remains the same. </b>Therefore, you don't have to worry about any changes in NGINX's working mode, nor about the authenticity and accuracy of the variable values, because they are just simple concatenations and mappings of NGINX's internal variables.
+I have consulted various resources hoping to find a good solution, but to no avail 😞. So, I decided to develop a tool myself to help me efficiently solve all the above problems — <b>NGINX Debugger</b> came into being 🥳
+
+## Problems Solved by NGINX Debugger
+
+NGINX Debugger attempts to solve all the above problems in the simplest and most efficient way, adhering to best practices. After much thought, I decided to register two new variables in <b>access.log</b>: <b>$upstream_uri</b> and <b>$matched_locations</b>. They have the following purposes:
+
+- <b>$upstream_uri</b>: NGINX supports multiple upstreams, including `proxy_pass`, `fastcgi_pass`, `uwsgi_pass`, and `scgi_pass`, etc. No matter which upstream you use, `$upstream_uri` can display the final complete address that NGINX has concatenated.
+
+- <b>$matched_locations</b>: If the `location` block uses the `rewrite` directive, the request may be internally redirected within NGINX, and redirected multiple times. Using `$matched_locations` can display this process in a visual form like `locationA -> locationB -> locationC`, so we can clearly grasp the flow of each request within NGINX, thereby eliminating strange bugs like "it should have hit locationA, but it hit locationB".
 
 ## How to Use
 
@@ -75,6 +84,10 @@ Although there are many Linux distributions, their Nginx installation directory 
 You can refer to the following configuration to enable support for upstream_uri and matched_locations in access.log (for reference only; you can configure as needed):
 
 ![配置](assets/configuration.png)
+
+## Technical Details
+
+NGINX Debugger is a recreation based on NGINX's latest version 🏷️[1.27.2](https://github.com/nginx/nginx/commit/e24f7ccc161f1a2a759eb27263ec9af4fc7c8e96): it adds an array property `ngx_array_t *matched_locations` to the `ngx_http_request_s` structure to store the process of NGINX matching location; it also registers two variables in `ngx_http_upstream.c` — upstream_uri and matched_locations, allowing us to obtain NGINX's <i>complete upstream address</i> and the <i>complete matching process of location</i> in <i>access.log</i> via `$upstream_uri` and `$matched_locations`. <b>Besides that, the code hasn't been changed at all, and the overall framework remains the same. </b>Therefore, you don't have to worry about any changes in NGINX's working mode, nor about the authenticity and accuracy of the variable values, because they are just simple concatenations and mappings of NGINX's internal variables.
 
 ## Comparison with Other Tools
 

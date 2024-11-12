@@ -15,12 +15,13 @@
 ## 目录
 
 - [NGINX Debugger 的由来](#nginx-debugger-的由来)
-- [技术细节](#技术细节)
+- [NGINX Debugger 解决的问题](#nginx-debugger-解决的问题)
 - [如何使用](#如何使用)
   - [Windows](#windows)
   - [Linux](#linux)
   - [FAQ](#faq)
 - [参考配置](#参考配置)
+- [技术细节](#技术细节)
 - [与其它工具的对比](#与其它工具的对比)
   - [Fiddler](#fiddler)
   - [Wireshark](#wireshark)
@@ -30,17 +31,24 @@
 
 ## NGINX Debugger 的由来
 
-作为一名前端工程师，与 NGINX 打交道是我每天的工作日常。NGINX 功能强大，配置灵活，但是对于新手来说很难掌握，尤其是涉及与 location 相关的配置：
+作为一名前端工程师，与 NGINX 打交道是我每天的工作日常。但与 NGINX 接触多了，我越来越觉得写 NGINX 的配置文件是一件 <b>费时</b> 且 <b>极容易出错</b> 的活儿 (︶︹︶) —— NGINX 虽然功能强大，但配置指令 <b>繁多</b> 且 <b>复杂</b>，即使是一点小的改动也可能带来翻天覆地的变化。因此，我们在写 NGINX 配置文件的时候必须慎之又慎！而在众多的 NGINX 配置项中，对我而言，`location` 块的配置就是噩梦中的噩梦 😭：
 
 - 首先，`location` 支持多种匹配方式，如 <b>前缀匹配</b>、<b>精确匹配</b>、<b>正则匹配</b> 等，不同的匹配方式还具有<b>不同优先级</b>，很容易搞混导致配置错误。
 
-- 其次，`location` 里可以搭配其它指令，如 <i>rewrite</i>、<i>try_files</i>、<i>proxy_pass</i> 等，这些能让 NGINX 产生不同的行为：比如 <i>rewrite</i> 会修改 URL 地址，导致请求在 NGINX 内部进行跳转，匹配到其它的规则；<i>try_files</i> 有类似的效果；而 <i>proxy_pass</i> 则会修改请求的 <i>upstream</i>，将其转发至下一终端。
+- 其次，`location` 里可以搭配其它指令，如 <b>rewrite</b>、<b>try_files</b>、<b>proxy_pass</b> 等，这些会让 NGINX 产生不同的行为：比如 <i>rewrite</i> 会修改 URL 地址，导致请求在 NGINX 内部进行跳转，进而匹配其它规则；<i>try_files</i> 有类似的效果；而 <i>proxy_pass</i> 则会修改请求的上游，将其转发至其它终端。
 
-我曾经查阅多方资料，希望能找到一个好的解决方案，但结果一无所获 😞。于是，我决定自己开发一个工具，来帮我省时高效地解决以上所有问题 —— <b>NGINX Debugger</b> 应运而生 🥳
+基于这种情况，我们在调试 NGINX 配置时，可能会发现一些<b>“莫名其妙的 BUG”</b> —— 比如我们明明预期某个请求应该命中 `locationA` ，但它却表现得像是命中了 `locationB`；又或者我们希望某个请求转发后完整的路径是 `hostname:port/aaa/bbb/ccc`，但实际上它转发出去的是 `hostname:port/bbb/ccc`。
 
-## 技术细节
+这些令人恼人的 “BUG” 其实是因为请求可能在 Nginx 的内部进行跳转，当请求一开始命中 `locationA` 的时候，由于 `locationA` 里可能有 `rewrite` 指令，重写后的请求刚好匹配到了 `locationB`；另外，Nginx 对 `location` 的匹配使用的是 Perl 的正则引擎，很多人对它了解并不多，再加上 `proxy_pass` 指令在将请求转发给上游时，它对上游 URI 的拼接其实分为很多种情况，不同情况下拼接出来的路径完全不一样。 因此，这些问题的调试其实是很麻烦的，有时候可能会花费大半天的时间 😞。
 
-NGINX Debugger 是基于 NGINX 最新的 🏷️[1.27.2](https://github.com/nginx/nginx/commit/e24f7ccc161f1a2a759eb27263ec9af4fc7c8e96) 版本进行再创作的：它给 `ngx_http_request_s` 结构体新增了一个数组属性 `ngx_array_t *matched_locations`，用于存储 NGINX 匹配 `location` 的过程；又在 `ngx_http_upstream.c` 中注册了两个变量 —— upstream_uri 和 matched_locations，让我们可以在 <i>access.log</i> 里通过 `$upstream_uri` 和 `$matched_locations` 获取 NGINX 转发的 <i>完整上游地址</i> 以及 location 的 <i>完整匹配过程</i>。<b>除此之外，代码没有做任何改动，整体框架保持不变。</b>因此，你不用担心 NGINX 的工作模式发生了任何变化，也不用担心变量值的真实性与准确性，因为它们只是对 NGINX 内部变量的一点简单拼接、映射而已。
+我曾经查阅多方资料，希望能找到一个好的解决方案，但结果一无所获。于是，我只好自己开发一个工具，来帮我省心高效地解决以上问题 —— <b>NGINX Debugger</b> 应运而生 🥳
+
+## NGINX Debugger 解决的问题
+
+NGINX Debugger 尝试以最简单、最高效的方式解决上述所有问题，并遵守最佳实践。思考再三，我决定给 <b>access.log</b> 注册两个新变量： <b>$upstream_uri</b> 和 <b>$matched_locations</b>，它们有以下用途：
+
+- <b>$upstream_uri</b>: Nginx 支持多种上游，包括 `proxy_pass`、`fastcgi_pass`、`uwsgi_pass` 和 `scgi_pass`等。无论你使用的是哪种上游，`$upstream_uri` 都能将 Nginx 拼接过后的最终完整地址展现出来。
+- <b>$matched_locations</b>: 如果 `location` 块使用了 `rewrite` 指令，那么请求可能在 Nginx 内部进行转发，且转发多次。使用`$matched_locations`能将这一过程以类似 `locationA -> locationB -> locationC` 的可视化形式展现出来，这样就我们可以清晰地把握每个请求在 Nginx 内部的流转情况，进而排除掉类似“明明应该命中 locationA，却命中了 locationB” 的奇怪 BUG 的出现。
 
 ## 如何使用
 
@@ -75,6 +83,10 @@ Linux 版的 NGINX 在编译时，需要指定各选项目录（如 --modules-pa
 可以参照以下配置在 access.log 里启用对 upstream_uri 和 matched_locations 的支持（仅供参考，实际可按需配置）
 
 ![配置](assets/configuration.png)
+
+## 技术细节
+
+NGINX Debugger 是基于 NGINX 最新的 🏷️[1.27.2](https://github.com/nginx/nginx/commit/e24f7ccc161f1a2a759eb27263ec9af4fc7c8e96) 版本进行再创作的：它给 `ngx_http_request_s` 结构体新增了一个数组属性 `ngx_array_t *matched_locations`，用于存储 NGINX 匹配 `location` 的过程；又在 `ngx_http_upstream.c` 中注册了两个变量 —— upstream_uri 和 matched_locations，让我们可以在 <i>access.log</i> 里通过 `$upstream_uri` 和 `$matched_locations` 获取 NGINX 转发的 <i>完整上游地址</i> 以及 location 的 <i>完整匹配过程</i>。<b>除此之外，代码没有做任何改动，整体框架保持不变。</b>因此，你不用担心 NGINX 的工作模式发生了任何变化，也不用担心变量值的真实性与准确性，因为它们只是对 NGINX 内部变量的一点简单拼接、映射而已。
 
 ## 与其它工具的对比
 
