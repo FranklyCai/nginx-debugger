@@ -57,19 +57,27 @@ This release of NGINX Debugger is compiled into two versions, one for <b>Windows
 
 ### Windows
 
-The file system structure of Windows is simpler compared to Linux. You only need to copy the <i>nginx.exe</i> file from the repository into your local NGINX folder, replacing the previous executable file.
+Below are the commands to compile the NGINX Debugger on Windows (configuration reference link: https://nginx.org/en/docs/howto_build_on_win32.html):
+
+<img src="assets/windows_cmd_en.png" alt="Windows Compilation Command">
+
+- Method 1 (Fresh Installation): Download the `nginx.exe` from this repository to your local machine, and create the corresponding files and folders in the same directory, such as `conf/nginx.conf`, `logs/access.log`, `logs/error.log`, etc.
+
+- Method 2 (Replacement Installation): Download the `nginx.exe` from this repository and replace your locally installed `nginx.exe` with it.
 
 ### Linux
 
-When compiling the Linux version of NGINX, you need to specify directories for various options (such as --modules-path, --sbin-path, --conf-path, etc.). Taking the most popular Linux distribution at the moment — Ubuntu — as a reference, based on its Nginx installation directory, I used the following command to compile Nginx Debugger:
+Below are the commands to compile the NGINX Debugger on Linux (configuration reference link: https://nginx.org/en/docs/configure.html):
 
-<img src="assets/en_cmd.png" alt="Compilation Command" height="350" width="100%">
+<img src="assets/linux_cmd_en.png" alt="Linux Compilation Command">
 
-Although there are many Linux distributions, their Nginx installation directory structures are basically the same. You only need to copy the nginx file from the repository to replace `/usr/sbin/nginx`.
+- Method 1 (Fresh Installation): Download the `nginx` binary from this repository to `/usr/lib/nginx`, and create the corresponding files and folders, such as `/etc/nginx/nginx.conf`, `/var/log/nginx/access.log`, `/var/log/nginx/error.log`, etc.
+
+- Method 2 (Replacement Installation): Download the `nginx` binary from this repository and replace your locally installed `/usr/sbin/nginx` with it.
 
 - #### FAQ
 
-  If, when starting NGINX Debugger, you find console errors similar to the following reminding of <b>module version mismatch</b>:
+  If you are using Method 2 and encounter a console error indicating a <b>module version mismatch</b> when starting the `NGINX Debugger`:
 
   ```bash
   nginx: [emerg] module "/usr/lib/nginx/modules/ngx_http_geoip2_module.so" version 1018000 instead of 1027003 in /etc/nginx/modules-enabled/50-mod-http-geoip2.conf:1

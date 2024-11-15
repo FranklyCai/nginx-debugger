@@ -56,19 +56,28 @@ NGINX Debugger 尝试以最简单、最高效的方式解决上述所有问题�
 
 ### Windows
 
-Windows 的文件系统结构相较于 Linux 来说更为简单。你只需将仓库里的 <i>nginx.exe</i> 文件复制到你本地的 NGINX 文件夹下，替换掉之前的可执行文件即可。
+以下是 Windows 下编译 NGINX Debugger 的指令（配置参考链接：https://nginx.org/en/docs/howto_build_on_win32.html）：
+
+<img src="assets/windows_cmd_zh.png" alt="Windows编译指令">
+
+- 使用方式一（全新安装）：将该仓库的 `nginx.exe` 下载到本地，并在与它同文件夹下创建对应的文件与文件夹，如 `conf/nginx.conf` 和 `logs/access.log`、`logs/error.log` 等
+
+- 使用方式二（替换安装）：将该仓库的 `nginx.exe` 下载到本地，替换掉你本地已经安装的 `nginx.exe`
+
 
 ### Linux
 
-Linux 版的 NGINX 在编译时，需要指定各选项目录（如 --modules-path、--sbin-path、--conf-path 等），我以时下最流行的 Linux 发行版 —— Ubuntu 为参照，基于它的 Nginx 安装目录，使用以下指令对 Nginx Debugger 进行了编译：
+以下是Linux下编译Nginx Debugger的指令（配置参考链接：https://nginx.org/en/docs/configure.html）：
 
-<img src="assets/cmd.png" alt="编译指令" height="350" width="100%">
+<img src="assets/linux_cmd_zh.png" alt="Linux编译指令">
 
-虽然 Linux 发行版本众多，但它们安装 Nginx 的目录结构基本是一致的，你只需将仓库里的 nginx 文件复制替换掉 `/usr/sbin/nginx` 即可。
+- 使用方式一（全新安装）：将该仓库的 `nginx` 下载到 `/usr/lib/nginx`，并创建对应的文件与文件夹，如 `/etc/nginx/nginx.conf` 和 `/var/log/nginx/access.log`、`/var/log/nginx/error.log` 等
+
+- 使用方式二（替换安装）：将该仓库的 `nginx` 下载到本地，替换掉你本地已经安装的 `/usr/sbin/nginx`
 
 - #### FAQ
 
-  如果在启动 `NGINX Debugger` 的时候，发现控制台有类似以下提醒 <b>模块版本不匹配</b> 的报错：
+  如果你使用的是方式二，且在启动 `NGINX Debugger` 的时候，发现控制台有类似以下提醒 <b>模块版本不匹配</b> 的报错：
 
   ```bash
   nginx: [emerg] module "/usr/lib/nginx/modules/ngx_http_geoip2_module.so" version 1018000 instead of 1027003 in /etc/nginx/modules-enabled/50-mod-http-geoip2.conf:1
