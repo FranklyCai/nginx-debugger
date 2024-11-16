@@ -52,7 +52,7 @@ NGINX Debugger 尝试以最简单、最高效的方式解决上述所有问题�
 
 ## 如何使用
 
-这次的 NGINX Debugger 分为两个版本编译，一个是 <strong>Windows</strong>，一个是 <strong>Linux</strong>。
+NGINX Debugger 可以在三个环境下使用：Windows、Linux 和 Docker
 
 ### Windows
 
@@ -63,7 +63,6 @@ NGINX Debugger 尝试以最简单、最高效的方式解决上述所有问题�
 - 使用方式一（全新安装）：将该仓库的 `nginx.exe` 下载到本地，并在与它同文件夹下创建对应的文件与文件夹，如 `conf/nginx.conf` 和 `logs/access.log`、`logs/error.log` 等
 
 - 使用方式二（替换安装）：将该仓库的 `nginx.exe` 下载到本地，替换掉你本地已经安装的 `nginx.exe`
-
 
 ### Linux
 
@@ -86,6 +85,14 @@ NGINX Debugger 尝试以最简单、最高效的方式解决上述所有问题�
   这是由于 `NGINX Debugger` 是基于最新的 🏷️[1.27.2](https://github.com/nginx/nginx/commit/e24f7ccc161f1a2a759eb27263ec9af4fc7c8e96) 版本进行编译的，而你本地安装的 Nginx 可能较低，因此导致模块的不匹配。你只需要将 nginx.conf 里引入 `modules-enabled` 的语句注释掉即可（如果你用不着这些模块的话）
 
   <img src="assets/comment.png" alt="注释">
+
+### Docker
+
+Docker 版本的使用最为简单，你只需要使用以下指令拉取镜像即可：
+```bash
+docker pull franklycai/nginx-debugger
+```
+它基于 [ubuntu/nginx:latest](https://hub.docker.com/r/ubuntu/nginx) 进行构建。
 
 ## 参考配置
 

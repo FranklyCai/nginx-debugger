@@ -53,7 +53,7 @@ NGINX Debugger attempts to solve all the above problems in the simplest and most
 
 ## How to Use
 
-This release of NGINX Debugger is compiled into two versions, one for <b>Windows</b> and one for <b>Linux</b>.
+NGINX Debugger can be used in three environments: Windows, Linux, and Docker.
 
 ### Windows
 
@@ -86,6 +86,13 @@ Below are the commands to compile the NGINX Debugger on Linux (configuration ref
   This is because NGINX Debugger is compiled based on the latest version 🏷️[1.27.2](https://github.com/nginx/nginx/commit/e24f7ccc161f1a2a759eb27263ec9af4fc7c8e96), and the Nginx installed on your local machine may be older, resulting in module mismatches. You only need to comment out the statements in nginx.conf that include `modules-enabled` (if you don't need these modules).
 
   <img src="assets/comment.png" alt="Comment">
+
+### Docker
+The Docker version is the simplest to use. You only need to run the following command to pull the image:
+```bash
+docker pull franklycai/nginx-debugger
+```
+It is built based on ubuntu/nginx.
 
 ## Reference Configuration
 
